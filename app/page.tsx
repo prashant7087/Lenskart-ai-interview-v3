@@ -46,7 +46,6 @@ export default function InterviewPage() {
       messagesRef.current = [...messagesRef.current, newMessage];
   };
 
-  // UseEffect Setup and other functions remain the same...
   // --- SETUP ---
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -123,11 +122,15 @@ export default function InterviewPage() {
     window.speechSynthesis.speak(utterance);
   };
 
+  // --- 🚀 FIXED: PASSING USER DATA TO BACKEND ---
   const finishInterview = async () => {
     stopListening(); 
     window.speechSynthesis.cancel(); 
     setPhase('analyzing');
-    const result = await generateAnalysis(messagesRef.current);
+    
+    // We pass 'userData' as the second argument so the database gets the Name/Store Code
+    const result = await generateAnalysis(messagesRef.current, userData);
+    
     setAnalysis(result);
     setPhase('results');
   };
