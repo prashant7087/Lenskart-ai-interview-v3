@@ -1,0 +1,131 @@
+# # version: '3.8'
+
+# # services:
+# #   # 1. Your Lenskart AI App
+# #   lenskart-app:
+# #     build: .
+# #     ports:
+# #       - "3000:3000"
+# #     environment:
+# #       # Pass your real API Key here
+# #       - GEMINI_API_KEY=${GEMINI_API_KEY}
+# #       # Database Connection String (Points to the 'db' service below)
+# #       - DATABASE_URL=postgresql://lenskart:securepassword@db:5432/lenskart_training
+# #       # Vault Config (Ready for when you deploy)
+# #       - VAULT_URI=http://127.0.0.1:8200
+# #       - VAULT_AUTHENTICATION=TOKEN
+# #     depends_on:
+# #       - db
+
+# #   # 2. The Database (PostgreSQL)
+# #   db:
+# #     image: postgres:15-alpine
+# #     restart: always
+# #     environment:
+# #       POSTGRES_USER: lenskart
+# #       POSTGRES_PASSWORD: securepassword
+# #       POSTGRES_DB: lenskart_training
+# #     ports:
+# #       - "5432:5432" # Expose DB port so you can check it with a GUI tool
+# #     volumes:
+# #       - postgres_data:/var/lib/postgresql/data
+
+# # volumes:
+# #   postgres_data:
+
+# version: '3.8'
+
+# services:
+#   # 1. Your App
+#   lenskart-app:
+#     build: .
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       - GEMINI_API_KEY=${GEMINI_API_KEY}
+#       - DATABASE_URL=postgresql://lenskart:securepassword@db:5432/lenskart_training
+#       # Points to the 'vault' service below
+#       - VAULT_URI=http://vault:8200
+#       - VAULT_AUTHENTICATION=TOKEN
+#       - VAULT_TOKEN=root
+#     depends_on:
+#       - db
+#       - vault
+
+#   # 2. Database
+#   db:
+#     image: postgres:15-alpine
+#     restart: always
+#     environment:
+#       POSTGRES_USER: lenskart
+#       POSTGRES_PASSWORD: securepassword
+#       POSTGRES_DB: lenskart_training
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+#   # 3. Local Vault Server
+#   vault:
+#     image: hashicorp/vault:latest
+#     container_name: vault
+#     ports:
+#       - "8200:8200"
+#     environment:
+#       VAULT_DEV_ROOT_TOKEN_ID: root
+#       VAULT_ADDR: 'http://0.0.0.0:8200'
+#     cap_add:
+#       - IPC_LOCK
+
+# volumes:
+#   postgres_data:
+
+version: '3.8'
+
+services:
+  # 1. Your App
+  lenskart-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # 🛑 REMOVED API KEY: App must now get it from Vault!
+      
+      # Database Connection
+      - DATABASE_URL=postgresql://lenskart:securepassword@db:5432/lenskart_training
+      
+      # Vault Connection (Points to the 'vault' service below)
+      - VAULT_URI=http://vault:8200
+      - VAULT_AUTHENTICATION=TOKEN
+      - VAULT_TOKEN=root
+    depends_on:
+      - db
+      - vault
+
+  # 2. Database
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: lenskart
+      POSTGRES_PASSWORD: securepassword
+      POSTGRES_DB: lenskart_training
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 3. Local Vault Server
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_ADDR: 'http://0.0.0.0:8200'
+    cap_add:
+      - IPC_LOCK
+
+volumes:
+  postgres_data:

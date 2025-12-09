@@ -1,0 +1,36 @@
+// This tells Prisma to use the JavaScript client
+generator client {
+  provider = "prisma-client-js"
+  // ✅ FIXED: Added explicit support for Alpine Linux (OpenSSL 3.0) and ARM64 (Mac Chips)
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
+}
+// This tells Prisma to connect to PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Your Data Model
+model Interview {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  
+  // Candidate Info
+  candidateName String
+  storeCode     String?  // The "?" means it can be empty/null
+  
+  // Performance Stats
+  overallScore  Int
+  duration      String
+  scenario      String
+  
+  // SERVE Framework Scores (0-10)
+  scoreStop      Int
+  scoreEmpathize Int
+  scoreResolve   Int
+  scoreVerify    Int
+  scoreExceed    Int
+  
+  // The AI Feedback
+  summary       String   @db.Text // Use @db.Text for long paragraphs
+}
